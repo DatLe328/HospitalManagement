@@ -1,10 +1,9 @@
-import math
 from flask import render_template, request, redirect, jsonify, session
 import dao, utils
 from app import app, login
 from flask_login import login_user, logout_user
 from app.models import UserRole
-
+from app import admin
 
 @app.route("/")
 def index():
@@ -69,5 +68,4 @@ def get_user_by_id(user_id):
 
 
 if __name__ == '__main__':
-    from app import admin
     app.run(debug=True)

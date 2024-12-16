@@ -1,4 +1,4 @@
-from app.models import Category, Product, User
+from app.models import User
 from app import app, db
 import hashlib
 import cloudinary.uploader

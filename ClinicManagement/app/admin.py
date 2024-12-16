@@ -1,4 +1,4 @@
-from app.models import Category, Product, User, UserRole
+from app.models import User, UserRole
 from app import app, db
 from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
