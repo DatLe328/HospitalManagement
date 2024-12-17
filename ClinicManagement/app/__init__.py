@@ -13,9 +13,13 @@ app.config["PAGE_SIZE"] = 6
 db = SQLAlchemy(app)
 login = LoginManager(app)
 
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
+
+# Configuration
 cloudinary.config(
-    cloud_name="dxxwcby8l",
-    api_key="448651448423589",
-    api_secret="ftGud0r1TTqp0CGp5tjwNmkAm-A",  # Click 'View API Keys' above to copy your API secret
+    cloud_name = "dokzvxp8m",
+    api_key = "712437327494933",
+    api_secret = "<mAhCr1YQc_NUGDuGHOoQ1Ohrk1M>", # Click 'View API Keys' above to copy your API secret
     secure=True
 )

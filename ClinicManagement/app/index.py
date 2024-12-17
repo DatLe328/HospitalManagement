@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, jsonify, session
 import dao, utils
 from app import app, login
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, login_required, current_user
 from app.models import UserRole
 from app import admin
 
@@ -36,6 +36,16 @@ def login_admin_process():
     return redirect('/admin')
 
 
+@app.route("/appointments", methods=['get', 'post'])
+def appointments_process():
+    return render_template('appointments.html')
+
+@app.route("/profile", methods=['get', 'post'])
+@login_required
+def profile_process():
+    user = current_user
+    return render_template('profile.html', user=user)
+
 @app.route("/logout")
 def logout_process():
     logout_user()
@@ -69,3 +79,4 @@ def get_user_by_id(user_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+

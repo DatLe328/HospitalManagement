@@ -1,0 +1,15 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <h1>User: {{ user.username }}</h1>
+    <hr>
+    {% if posts %}
+        {% for post in posts %}
+        <p>
+        {{ post.author.username }} says: <b></b>
+        </p>
+        {% endfor %}
+    {% else %}
+        <p>Không có bài viết nào.</p>
+    {% endif %}
+{% endblock %}
