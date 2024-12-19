@@ -1,38 +1,72 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<h1 class="text-center text-danger mt-1">THÔNG KÊ BÁO CÁO</h1>
 
-<div class="row">
-    <div class="col-md-7 col-12"></div>
-    <div class="col-md-5 col-12">
-        <canvas id="myChart"></canvas>
+<head>
+    <link href="{{ url_for('static', filename='css/stats.css') }}" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+</head>
+
+<h2 class="statTitle">THỐNG KÊ - BÁO CÁO SỬ DỤNG THUỐC</h2>
+
+<div class="stats row">
+    <div style="height: 550px; overflow: auto" class="stats-left col-md-5 col-sm-12">
+        <table class="table">
+
+            <tr>
+                <th>id</th>
+                <th>Tên thuốc</th>
+                <th>Đơn vị</th>
+                <th>Số lượng</th>
+
+            </tr>
+            {% for sM in statsMedicine %}
+            <tr>
+                <td>{{ sM[0] }}</td>
+                <td>{{ sM[1] }}</td>
+                <td>{{ sM[2] }}</td>
+                <td>{{ sM[3] }}</td>
+
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+    <div class="stats-right col-md-7 col-sm-12">
+        <form>
+            <div class="form-group">
+                <input type="text" placeholder="Nhập tên thuốc" name="kw" class="form-control"/>
+            </div>
+            <div style = "display: flex; justify-content: space-between">
+                <div style="width: 45%" class="form-group">
+                    <label>Từ ngày</label>
+                    <input type="date" name="from_date" class="form-control"/>
+                </div>
+                <div style="width: 45%" class="form-group">
+                    <label>Đến ngày</label>
+                    <input type="date" name="to_date" class="form-control"/>
+                </div>
+            </div>
+            <div>
+                <input type="submit" value="Lọc dữ liệu" class="btn btn-info"/>
+            </div>
+        </form>
+        <canvas id="revenueStats"></canvas>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/my-chart.js') }}"></script>
 <script>
-    window.onload = function() {
-         const ctx = document.getElementById('myChart');
+let data = [], labels=[];
+  {% for sM in statsMedicine %}
+    data.push({{ sM[3] }})
+    labels.push('{{ sM[1] }}')
+  {% endfor %}
+  window.onload = function() {
+    drawMedicineStats(labels, data)
+  }
 
-          new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-              datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                borderWidth: 1
-              }]
-            },
-            options: {
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
-              }
-            }
-          });
-    }
+
 </script>
 {% endblock %}
