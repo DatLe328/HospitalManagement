@@ -6,7 +6,7 @@ import cloudinary
 
 app = Flask(__name__)
 app.secret_key = 'HJGFGHF^&%^&&*^&*YUGHJGHJF^%&YYHB'
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/test?charset=utf8mb4" % quote('1234')
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/test?charset=utf8mb4" % quote('root')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 6
 app.config['CART_KEY'] = 'cart'
