@@ -19,15 +19,6 @@
                     <a class="nav-link" href="/">Trang chủ</a>
                 </li>
                 {% if current_user.is_authenticated %}
-
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="/login">
-                        <img src="{{ current_user.anhDaiDien }}" width="40" class="rounded-circle"
-                             alt="{{ current_user.tenUser }}"/>
-                        {{ current_user.tenUser }}
-
-                    </a>
-                </li>
                 {% if current_user.user_role.value == 3 or current_user.user_role.value == 5 %}
                 <li class="nav-item">
                     <a class="nav-link" href="/nurse">Lập danh sách khám</a>

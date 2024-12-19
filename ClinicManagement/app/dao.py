@@ -5,38 +5,49 @@ import cloudinary.uploader
 from flask_login import current_user
 from sqlalchemy import func
 
-def auth_user(username, password, role=None):
-    password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
-
-    u = User.query.filter(User.username.__eq__(username),
-                          User.password.__eq__(password))
-
-    if role:
-        u = u.filter(User.user_role.__eq__(role))
-
-    return u.first()
+def load_lich_su_benh(lsb_id):
+    return db.session.query(MedicalHistory).filter_by(id=lsb_id).first()
 
 
-def get_user_by_id(user_id):
-    return User.query.get(user_id)
+def load_phieu_kham(prescription_id):
+    return db.session.query(Prescription).filter_by(id=prescription_id).first()
 
 
-def add_user(name, username, password, avatar=None):
-    password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
+def add_user(full_name, username, password, birth_date, gender, phone_number, address, avatar=None,
+             user_role=UserRole.USER, status=True):
+    existing_user = User.query.filter((User.username == username) | (User.phone_number == phone_number)).first()
+    if existing_user:
+        raise Exception('Username or phone number is already in use.')
 
-    u = User(name=name, username=username, password=password)
-    if avatar:
-        res = cloudinary.uploader.upload(avatar)
-        u.avatar = res.get('secure_url')
+    avatar_path = avatar if avatar else "static/default-avatar.png"
 
-    db.session.add(u)
-    db.session.commit()
+    new_user = User(
+        full_name=full_name,
+        username=username,
+        password=password,
+        birth_date=birth_date,
+        gender=gender,
+        phone_number=phone_number,
+        address=address,
+        avatar=avatar_path,
+        user_role=user_role,
+        status=status,
+    )
+
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise Exception(f"Error while adding user: {str(e)}")
 
 
 
+def get_user_by_username(username):
+    return User.query.filter_by(username=username).first()
 
-
-
+def get_user_by_phone(phone_number):
+    return User.query.filter_by(phone_number=phone_number).first()
 
 from sqlalchemy.sql.functions import user
 

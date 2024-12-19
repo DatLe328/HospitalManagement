@@ -6,12 +6,29 @@ from app.models import UserRole
 from app import admin
 import json
 
+
 @app.route("/")
 def index():
     return render_template('index.html')
 
-# ============================================== #
 
+# ============================================== #
+@app.route('/api/get_prescription/<int:lsb_id>', methods=['GET'])
+def get_prescription(lsb_id):
+    # Fetch the medical history using lsb_id
+    medical_history = dao.load_lich_su_benh(lsb_id)
+    if not medical_history or not medical_history.prescription_id:
+        return jsonify({"success": False, "message": "Đơn thuốc không tồn tại."})
+
+    # Fetch the prescription using the prescription_id
+    prescription = dao.load_phieu_kham(medical_history.prescription_id)
+    if not prescription:
+        return jsonify({"success": False, "message": "Không tìm thấy thông tin đơn thuốc."})
+
+    # Render the prescription to HTML
+    html = render_template('components/prescription_details.html', prescription=prescription)
+
+    return jsonify({"success": True, "html": html})
 
 @app.route("/doctor")
 def doctor():
@@ -21,6 +38,7 @@ def doctor():
 @app.route("/nurse")
 def nurse():
     return render_template("nurse.html")
+
 
 @app.route("/user_dang_ky_kham", methods=['get', 'post'])
 def user_dang_ky_kham():
@@ -124,6 +142,7 @@ def save_chi_tiet_danh_sach_kham():  # cái action của form sẽ có tên như
 
     return render_template("nurse.html", err_msg=err_msg)
 
+
 user_id_in_phieu_kham = 0
 ma_phieu_kham_today = 0
 
@@ -213,6 +232,7 @@ def doctor_save_phieu_kham():
             err_msg = "Không tồn tại phiếu khám này"
     return render_template("doctor.html", err_msg=err_msg)
 
+
 @app.context_processor
 def load_medicines():
     medicines = dao.load_medicines()
@@ -230,6 +250,7 @@ def load_phieu_kham():
 
 
 user_id_in_hoa_don_for_one_user = 0
+
 
 @app.route("/cashier", methods=['get', 'post'])
 def cashier():
@@ -256,10 +277,10 @@ def cashier():
                 dao.save_bill_for_user(phieu_kham[0][2], tien_thuoc, phieu_kham[0][5])
                 dao.payment(bill_cua_user[0])
                 err_msg = "Thanh toán thành công"
-                return render_template("cashier.html", err_msg = err_msg, tien_kham=tien_kham)
+                return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
             else:
                 tien_kham = 0
-                err_msg="Chưa có hóa đơn"
+                err_msg = "Chưa có hóa đơn"
                 return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
         else:
             err_msg = "Không tồn tại phiếu khám này trong ngày hôm nay"
@@ -267,6 +288,7 @@ def cashier():
         return render_template("cashier.html", err_msg=err_msg)
 
     return render_template("cashier.html", err_msg=err_msg)
+
 
 @login.user_loader
 def load_user(user_id):
@@ -335,7 +357,7 @@ def load_hoa_don():
 @app.context_processor
 def load_hoa_don_for_one_user():
     hoa_don = dao.load_hoa_don_by_phieu_kham_id(
-        user_id_in_hoa_don_for_one_user)  # Bỏ user_id dô là lọc đc lsb của user đó nhưng vì không biết truyền biến kiểu gì nên thôi load hết
+        user_id_in_hoa_don_for_one_user)
     return {
         "hoa_don": hoa_don
     }
@@ -397,7 +419,6 @@ def change_password():
         flash('New password and confirmation do not match.', 'danger')
         return redirect(url_for('profile_process'))
 
-
     try:
         current_user.password = str(hashlib.md5(new_password.encode('utf-8')).hexdigest())
         db.session.commit()
@@ -407,6 +428,8 @@ def change_password():
         flash(f'An error occurred: {e}', 'danger')
 
     return redirect(url_for('profile_process'))
+
+
 # ============================================== #
 @app.route("/login", methods=['get', 'post'])
 def login_process():
@@ -438,11 +461,13 @@ def login_admin_process():
 def appointments_process():
     return render_template('appointments.html')
 
+
 @app.route("/profile", methods=['get', 'post'])
 @login_required
 def profile_process():
     user = current_user
     return render_template('profile.html', user=user)
+
 
 @app.route("/logout")
 def logout_process():
@@ -450,22 +475,54 @@ def logout_process():
     return redirect('/login')
 
 
-@app.route("/register", methods=['get', 'post'])
+@app.route("/register", methods=['GET', 'POST'])
 def register_process():
     err_msg = None
-    if request.method.__eq__('POST'):
+    if request.method == 'POST':
+        username = request.form.get('username')
         password = request.form.get('password')
         confirm = request.form.get('confirm')
+        name = request.form.get('name')
+        birth_day = request.form.get('birth_day')
+        address = request.form.get('address')
+        telephone = request.form.get('telephone')
+        sex = request.form.get('sex')
+        avatar = request.files.get('avatar')
 
-        if password.__eq__(confirm):
-            data = request.form.copy()
-            del data['confirm']
-
-            avatar = request.files.get('avatar')
-            dao.add_user(avatar=avatar, **data)
-            return redirect('/login')
+        existing_user = dao.get_user_by_username(username)
+        if existing_user:
+            err_msg = "Tên đăng nhập đã tồn tại. Vui lòng sử dụng tên khác."
+        elif password != confirm:
+            err_msg = "Mật khẩu và xác nhận mật khẩu KHÔNG khớp."
+        elif dao.get_user_by_phone(telephone):
+            err_msg = "Số điện thoại đã được sử dụng."
         else:
-            err_msg = 'Mật khẩu KHÔNG khớp!'
+            import hashlib
+            hashed_password = hashlib.md5(password.encode('utf-8')).hexdigest()
+
+            avatar_path = None
+            if avatar:
+                avatar_path = f"static/uploads/{avatar.filename}"
+                avatar.save(avatar_path)
+            else:
+                avatar_path = "static/default-avatar.png"
+
+            try:
+                dao.add_user(
+                    full_name=name,
+                    username=username,
+                    password=hashed_password,
+                    birth_date=birth_day,
+                    gender=int(sex),
+                    phone_number=telephone,
+                    address=address,
+                    avatar=avatar_path,
+                    user_role=UserRole.USER,
+                    status=True
+                )
+                return redirect('/login')
+            except Exception as e:
+                err_msg = f"Đã có lỗi xảy ra: {str(e)}"
 
     return render_template('register.html', err_msg=err_msg)
 
