@@ -34,6 +34,13 @@ def get_prescription(lsb_id):
 def doctor():
     return render_template("doctor.html")
 
+@app.route("/introduce")
+def introduce():
+    return render_template("introduce.html")
+
+@app.route("/support")
+def support():
+    return render_template("support.html")
 
 @app.route("/nurse")
 def nurse():
