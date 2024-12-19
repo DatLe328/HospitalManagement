@@ -22,11 +22,11 @@ def doctor():
 def nurse():
     return render_template("nurse.html")
 
-@app.route("/user_dang_ky_kham", methods=['get', 'post'])  # đường dẫn chứa cái trang cần lấy data
+@app.route("/user_dang_ky_kham", methods=['get', 'post'])
 def user_dang_ky_kham():
     err_msg = ''
     if request.method == ('POST'):
-        with open("app/data/quy_dinh.json", "r") as file:
+        with open("app/data/rules.json", "r") as file:
             quy_dinh = json.load(file)
 
             SDT_dang_ky_kham = request.form['user_dang_ky_kham']
@@ -238,7 +238,7 @@ def cashier():
     hd = ""
     # nhập id của phieuKham
     if request.method == ('POST'):
-        with open("app/data/quy_dinh.json", "r") as file:
+        with open("app/data/rules.json", "r") as file:
             quy_dinh = json.load(file)
         tien_kham = quy_dinh["tien_kham"]
         phieuKham_id = request.form['submit_phieuKham_id']
@@ -369,14 +369,6 @@ def lich_su_benh():
         lsb_for_crr = dao.load_lich_su_benh_in_view(current_user.id)
     return render_template("lich_su_benh.html", lsb_for_crr=lsb_for_crr)
 
-
-# @app.route("/lich_su_benh")
-# def load_lich_su_benh():
-#     load_lich_su_benh_in_view = dao.load_lich_su_benh_in_view(user_id_in_lich_su_benh_after_filter)
-#     if load_lich_su_benh_in_view:
-#         return load_lich_su_benh_in_view
-#
-#     return render_template("lich_su_benh.html", load_lich_su_benh_in_view=load_lich_su_benh_in_view)
 
 @app.context_processor
 def load_lich_su_benh():

@@ -58,7 +58,7 @@ class MyRuleView(BaseView):
         err_msg = ""
         quy_dinh = {"tien_kham": 0, "so_benh_nhan": 0}
         try:
-            with open("app/data/quy_dinh.json", "r") as file:
+            with open("app/data/rules.json", "r") as file:
                 quy_dinh = json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             err_msg = "Không tìm thấy hoặc lỗi đọc file quy định."
@@ -78,7 +78,7 @@ class MyRuleView(BaseView):
                     quy_dinh["tien_kham"] = tien_kham
                     quy_dinh["so_benh_nhan"] = so_benh_nhan
                     try:
-                        with open("data/quy_dinh.json", "w") as file:
+                        with open("data/rules.json", "w") as file:
                             json.dump(quy_dinh, file)
                     except IOError:
                         err_msg = "Không thể ghi dữ liệu vào file."
