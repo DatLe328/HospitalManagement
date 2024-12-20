@@ -30,9 +30,10 @@ def get_prescription(lsb_id):
 
     return jsonify({"success": True, "html": html})
 
-@app.route("/doctor")
+@app.route("/doctor", methods=['GET'])
 def doctor():
-    return render_template("doctor.html")
+    patients = dao.load_users()
+    return render_template("doctor.html", patients=patients)
 
 @app.route("/introduce")
 def introduce():
@@ -386,17 +387,23 @@ def lay_ma_benh_nhan_xem_lich_su_benh():
         if lich_su_benh_for_one_user:
             global user_id_in_lich_su_benh_after_filter
             user_id_in_lich_su_benh_after_filter = lich_su_benh_for_one_user[0][1]
+            medical_history = dao.get_phieu_kham_by_user_id(lich_su_benh_for_one_user[0][1])
         else:
             err_msg = "Không tồn tại bệnh nhân này"
 
-    return render_template("lich_su_benh.html", err_msg=err_msg)
-
+    return render_template("lich_su_benh.html", err_msg=err_msg, medical_history=medical_history)
 
 @app.route("/lich_su_benh")
 def lich_su_benh():
     if current_user.is_authenticated:
         lsb_for_crr = dao.load_lich_su_benh_in_view(current_user.id)
-    return render_template("lich_su_benh.html", lsb_for_crr=lsb_for_crr)
+    medical_history = dao.get_phieu_kham_by_user_id(current_user.id)
+
+    if medical_history:
+        for history in medical_history:
+            print(history)
+
+    return render_template("lich_su_benh.html", lsb_for_crr=lsb_for_crr, medical_history=medical_history)
 
 
 @app.context_processor
@@ -406,6 +413,41 @@ def load_lich_su_benh():
     return {
         "load_lich_su_benh_in_view": load_lich_su_benh_in_view
     }
+
+@app.route('/update_thuoc_description', methods=['POST'])
+def update_thuoc_description():
+    """
+       Update the description of a medicine item in the database.
+       """
+    try:
+        thuoc_id = request.form.get('thuoc_id')
+        new_description = request.form.get('description')
+
+        if thuoc_id and new_description:
+            dao.update_thuoc_description(thuoc_id, new_description)
+            return redirect(url_for('doctor'))  # Redirect to the doctor page after updating
+        else:
+            return "Invalid input", 400
+    except Exception as e:
+        print(f"Error updating thuoc description: {e}")
+        return "Failed to update", 500
+
+@app.route('/delete_thuoc', methods=['POST'])
+def delete_thuoc():
+    """
+       Delete a medicine item based on thuoc_id.
+       """
+    try:
+        thuoc_id = request.form.get('thuoc_id')
+
+        if thuoc_id:
+            dao.delete_thuoc(thuoc_id)
+            return redirect(url_for('doctor'))  # Redirect after deleting
+        else:
+            return "Invalid input", 400
+    except Exception as e:
+        print(f"Error deleting thuoc: {e}")
+        return "Failed to delete", 500
 
 
 @app.route("/change-password", methods=['POST'])

@@ -70,6 +70,56 @@
                                             <td>{{ lsb.full_name }}</td>
                                             <td>{{ lsb.diagnosis }}</td>
                                             <td>{{ lsb.date }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                        data-bs-target="#staticBackdrop">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+                                                     data-bs-keyboard="false" tabindex="-1"
+                                                     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="staticBackdropLabel">Modal
+                                                                    title</h5>
+                                                                <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                {# Data #}
+                                                                <table class="table">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Quantity</th>
+                                                                        <th>description</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    {% for record in medical_history %}
+                                                                        <tr>
+                                                                            <td>{{ record.medicine_name }}</td>
+                                                                            <td>{{ record.quantity }}</td>
+                                                                            <td>{{ record.description }}</td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Close
+                                                                </button>
+                                                                <button type="button" class="btn btn-primary">
+                                                                    Understood
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
                                         </tr>
 
                                     {% endfor %}
@@ -86,13 +136,13 @@
                                             <td>{{ lsb.date }}</td>
                                             <td>
                                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                        data-bs-target="#staticBackdrop" onclick="loadPrescription({{ lsb.id }});">
+                                                        data-bs-target="#staticBackdrop">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
                                                 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
                                                      data-bs-keyboard="false" tabindex="-1"
                                                      aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title" id="staticBackdropLabel">Modal
@@ -102,10 +152,25 @@
                                                                         aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
-{#                                                                Data loader #}
-                                                                <div id="prescriptionContent">
-                                                                    <p>Đang tải dữ liệu...</p>
-                                                                </div>
+                                                                {# Data #}
+                                                                <table class="table">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Quantity</th>
+                                                                        <th>description</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    {% for record in medical_history %}
+                                                                        <tr>
+                                                                            <td>{{ record.medicine_name }}</td>
+                                                                            <td>{{ record.quantity }}</td>
+                                                                            <td>{{ record.description }}</td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                    </tbody>
+                                                                </table>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
@@ -129,30 +194,6 @@
             </div>
 
             </div>
-<script>
-    function loadPrescription(lsbId) {
-        const contentDiv = document.getElementById("prescriptionContent");
-        contentDiv.innerHTML = "<p>Đang tải dữ liệu...</p>";  // Placeholder text while loading
-
-        // Fetch data from the API
-        fetch(`/api/get_prescription/${lsbId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    contentDiv.innerHTML = data.html;  // Inject prescription HTML
-                } else {
-                    contentDiv.innerHTML = `<p class="text-danger">${data.message}</p>`;
-                }
-            })
-            .catch(() => {
-                contentDiv.innerHTML = "<p class='text-danger'>Không thể tải dữ liệu đơn thuốc.</p>";
-            });
-
-        // Show the modal
-        $('#prescriptionModal').modal('show');
-    }
-</script>
-
         {% else %}
             <h1>GOOD</h1>
         {% endif %}
