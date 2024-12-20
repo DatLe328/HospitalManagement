@@ -5,12 +5,65 @@ import cloudinary.uploader
 from flask_login import current_user
 from sqlalchemy import func
 
-def load_lich_su_benh(lsb_id):
-    return db.session.query(MedicalHistory).filter_by(id=lsb_id).first()
+def update_thuoc_description(thuoc_id, description):
+    """
+       Update the description of a medicine item in the database.
+       :param thuoc_id: Medicine ID
+       :param description: New description
+       """
+    try:
+        medicine = Medicine.query.get(thuoc_id)
+        if medicine:
+            medicine.description = description
+            db.session.commit()
+    except Exception as e:
+        print(f"Error in update_thuoc_description: {e}")
+        db.session.rollback()
 
+def delete_thuoc(thuoc_id):
+    """
+       Delete a medicine from the database using its ID.
+       :param thuoc_id: Medicine ID
+       """
+    try:
+        medicine = Medicine.query.get(thuoc_id)
+        if medicine:
+            db.session.delete(medicine)
+            db.session.commit()
+    except Exception as e:
+        print(f"Error in delete_thuoc: {e}")
+        db.session.rollback()
 
-def load_phieu_kham(prescription_id):
-    return db.session.query(Prescription).filter_by(id=prescription_id).first()
+def get_phieu_kham_by_user_id(user_id):
+    try:
+        # Query prescriptions linked to the user
+        prescriptions = (
+            Prescription.query.filter_by(user_id=user_id)
+            .join(PrescriptionDetail, Prescription.id == PrescriptionDetail.prescription_id)
+            .join(Medicine, Medicine.id == PrescriptionDetail.medicine_id)
+            .add_columns(
+                Medicine.name.label('medicine_name'),
+                PrescriptionDetail.quantity.label('quantity'),
+                Medicine.description.label('description')
+            ).all()
+        )
+
+        if not prescriptions:
+            return None
+
+        # Structure the results for easier consumption
+        result = []
+        for prescription in prescriptions:
+            result.append({
+                "medicine_name": prescription.medicine_name,
+                "quantity": prescription.quantity,
+                "description": prescription.description
+            })
+
+        return result
+    except Exception as ex:
+        print(f"Error fetching prescription data: {ex}")
+        return None
 
 
 def add_user(full_name, username, password, birth_date, gender, phone_number, address, avatar=None,
